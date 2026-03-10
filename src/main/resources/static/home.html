@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f3f6fb;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #1f2937;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      max-width: 560px;
+      width: 100%;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      text-align: center;
+    }
+
+    .subtitle {
+      margin: 8px 0 22px;
+      color: #4b5563;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 8px;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #1e4fc7;
+    }
+
+    .message {
+      min-height: 18px;
+      margin: 12px 0 0;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .error {
+      color: #dc2626;
+    }
+
+    .weather-card {
+      margin-top: 18px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px;
+      background: #fafbff;
+      display: none;
+    }
+
+    .weather-card.visible {
+      display: block;
+    }
+
+    .weather-title {
+      margin: 0 0 8px;
+      font-size: 22px;
+      color: #111827;
+    }
+
+    .weather-detail {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .weather-detail strong {
+      color: #111827;
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <h1>Weather Dashboard</h1>
+    <p class="subtitle">Search weather by city and country</p>
+
+    <form id="weatherForm" novalidate>
+      <div class="grid">
+        <div>
+          <label for="city">City</label>
+          <input id="city" name="city" type="text" placeholder="e.g. Hyderabad" required />
+        </div>
+
+        <div>
+          <label for="country">Country</label>
+          <input id="country" name="country" type="text" placeholder="e.g. IN" required />
+        </div>
+      </div>
+
+      <button type="submit">Get Weather Report</button>
+    </form>
+
+    <p id="message" class="message" aria-live="polite"></p>
+
+    <section id="weatherCard" class="weather-card" aria-live="polite">
+      <h2 id="placeName" class="weather-title"></h2>
+      <p class="weather-detail"><strong>Temperature:</strong> <span id="temp"></span></p>
+      <p class="weather-detail"><strong>Feels Like:</strong> <span id="feelsLike"></span></p>
+      <p class="weather-detail"><strong>Condition:</strong> <span id="condition"></span></p>
+      <p class="weather-detail"><strong>Humidity:</strong> <span id="humidity"></span></p>
+      <p class="weather-detail"><strong>Wind Speed:</strong> <span id="wind"></span></p>
+    </section>
+  </main>
+
+  <script>
+    const apiKey = '68ae8596a7c32923e4d3a8169b6ae718';
+    const form = document.getElementById('weatherForm');
+    const message = document.getElementById('message');
+    const weatherCard = document.getElementById('weatherCard');
+
+    function showError(text) {
+      message.className = 'message error';
+      message.textContent = text;
+    }
+
+    function clearMessage() {
+      message.className = 'message';
+      message.textContent = '';
+    }
+
+    function renderWeather(data) {
+      document.getElementById('placeName').textContent = `${data.name}, ${data.sys.country}`;
+      document.getElementById('temp').textContent = `${Math.round(data.main.temp)} °C`;
+      document.getElementById('feelsLike').textContent = `${Math.round(data.main.feels_like)} °C`;
+      document.getElementById('condition').textContent = data.weather[0].description;
+      document.getElementById('humidity').textContent = `${data.main.humidity}%`;
+      document.getElementById('wind').textContent = `${data.wind.speed} m/s`;
+      weatherCard.classList.add('visible');
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearMessage();
+
+      const city = document.getElementById('city').value.trim();
+      const country = document.getElementById('country').value.trim();
+
+      if (!city || !country) {
+        weatherCard.classList.remove('visible');
+        showError('Please enter both city and country.');
+        return;
+      }
+
+      const query = `${city},${country}`;
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(query)}&appid=${apiKey}&units=metric`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok) {
+          weatherCard.classList.remove('visible');
+          showError(data.message || 'Unable to fetch weather details.');
+          return;
+        }
+
+        renderWeather(data);
+      } catch (error) {
+        weatherCard.classList.remove('visible');
+        showError('Failed to connect to weather service. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

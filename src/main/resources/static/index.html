@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f6fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      color: #1f2937;
+      text-align: center;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: #6b7280;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    input.invalid {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+    }
+
+    .error {
+      margin-top: 6px;
+      color: #dc2626;
+      font-size: 12px;
+      min-height: 14px;
+    }
+
+    .success {
+      margin: 0 0 14px;
+      color: #15803d;
+      font-size: 13px;
+      text-align: center;
+      min-height: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 8px;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #1e4fc7;
+    }
+
+    .auth-option {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 14px;
+      color: #4b5563;
+    }
+
+    .auth-option a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-option a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Registration</h1>
+    <p class="subtitle">Create your account to continue</p>
+
+    <p id="successMessage" class="success" aria-live="polite"></p>
+
+    <form id="registrationForm" novalidate>
+      <div class="field">
+        <label for="firstName">Name</label>
+        <input id="firstName" name="firstName" type="text" placeholder="Enter your name" required />
+        <div class="error" id="firstNameError" aria-live="polite"></div>
+      </div>
+
+      <div class="field">
+        <label for="secondName">Second Name</label>
+        <input id="secondName" name="secondName" type="text" placeholder="Enter your second name" required />
+        <div class="error" id="secondNameError" aria-live="polite"></div>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="Enter your email" required />
+        <div class="error" id="emailError" aria-live="polite"></div>
+      </div>
+
+      <div class="field">
+        <label for="username">Create User Name</label>
+        <input id="username" name="username" type="text" placeholder="Choose a username" required />
+        <div class="error" id="usernameError" aria-live="polite"></div>
+      </div>
+
+      <div class="field">
+        <label for="password">New Password</label>
+        <input id="password" name="password" type="password" placeholder="Create a password" required />
+        <div class="error" id="passwordError" aria-live="polite"></div>
+      </div>
+
+      <button type="submit">Sign Up</button>
+
+      <p class="auth-option">Already have an account? <a href="/login.html">Sign In</a></p>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById('registrationForm');
+    const successMessage = document.getElementById('successMessage');
+
+    const fields = {
+      firstName: {
+        input: document.getElementById('firstName'),
+        error: document.getElementById('firstNameError')
+      },
+      secondName: {
+        input: document.getElementById('secondName'),
+        error: document.getElementById('secondNameError')
+      },
+      email: {
+        input: document.getElementById('email'),
+        error: document.getElementById('emailError')
+      },
+      username: {
+        input: document.getElementById('username'),
+        error: document.getElementById('usernameError')
+      },
+      password: {
+        input: document.getElementById('password'),
+        error: document.getElementById('passwordError')
+      }
+    };
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function setError(field, message) {
+      field.error.textContent = message;
+      field.input.classList.add('invalid');
+    }
+
+    function clearError(field) {
+      field.error.textContent = '';
+      field.input.classList.remove('invalid');
+    }
+
+    function validateField(name) {
+      const field = fields[name];
+      const value = field.input.value.trim();
+
+      clearError(field);
+
+      if (!value) {
+        setError(field, 'This field is required.');
+        return false;
+      }
+
+      if (name === 'email' && !emailRegex.test(value)) {
+        setError(field, 'Please enter a valid email address.');
+        return false;
+      }
+
+      if (name === 'username' && value.length < 4) {
+        setError(field, 'Username must be at least 4 characters.');
+        return false;
+      }
+
+      if (name === 'password') {
+        const hasLetter = /[A-Za-z]/.test(value);
+        const hasNumber = /\d/.test(value);
+
+        if (value.length < 8 || !hasLetter || !hasNumber) {
+          setError(field, 'Password must be 8+ chars with letters and numbers.');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    Object.keys(fields).forEach((name) => {
+      fields[name].input.addEventListener('input', () => {
+        validateField(name);
+      });
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      successMessage.textContent = '';
+
+      let isValid = true;
+
+      Object.keys(fields).forEach((name) => {
+        if (!validateField(name)) {
+          isValid = false;
+        }
+      });
+
+      if (!isValid) {
+        return;
+      }
+
+      const payload = {
+        firstName: fields.firstName.input.value.trim(),
+        secondName: fields.secondName.input.value.trim(),
+        email: fields.email.input.value.trim(),
+        username: fields.username.input.value.trim(),
+        password: fields.password.input.value
+      };
+
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const body = await response.json();
+
+        if (!response.ok) {
+          successMessage.style.color = '#dc2626';
+          successMessage.textContent = body.message || 'Registration failed.';
+          return;
+        }
+
+        successMessage.style.color = '#15803d';
+        successMessage.textContent = 'Registration successful. Redirecting to login...';
+        window.location.href = '/login.html';
+      } catch (error) {
+        successMessage.style.color = '#dc2626';
+        successMessage.textContent = 'Unable to connect to server. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>

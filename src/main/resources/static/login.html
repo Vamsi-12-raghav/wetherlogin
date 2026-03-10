@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f6fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      color: #1f2937;
+      text-align: center;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: #6b7280;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .error {
+      margin: 0 0 10px;
+      color: #dc2626;
+      font-size: 13px;
+      text-align: center;
+      min-height: 16px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 8px;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #1e4fc7;
+    }
+
+    .auth-option {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .auth-option a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-option a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Login</h1>
+    <p class="subtitle">Enter your credentials</p>
+
+    <p id="errorMessage" class="error" aria-live="polite"></p>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="username">User Name</label>
+        <input id="username" name="username" type="text" placeholder="Enter your username" required />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Enter your password" required />
+      </div>
+
+      <button type="submit">Login</button>
+
+      <p class="auth-option"><a href="/forgot-password.html">Forgot Password?</a></p>
+    </form>
+  </main>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorMessage.textContent = '';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        errorMessage.textContent = 'Username and password are required.';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const body = await response.json();
+
+        if (!response.ok) {
+          errorMessage.textContent = body.message || 'Invalid username or password.';
+          return;
+        }
+
+        window.location.href = '/home.html';
+      } catch (error) {
+        errorMessage.textContent = 'Unable to connect to server. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>
